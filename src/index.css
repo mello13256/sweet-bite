@@ -1,0 +1,183 @@
+@import 'tailwindcss';
+
+/*
+ * Tokens de design. As cores principais podem ser alteradas em
+ * src/config/store.ts (são aplicadas por cima destes valores ao arrancar).
+ */
+@theme {
+  --font-sans: 'Plus Jakarta Sans Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces Variable', ui-serif, Georgia, serif;
+
+  /* Framboesa — cor de destaque */
+  --color-brand-50: #fdf2f5;
+  --color-brand-100: #fbe4eb;
+  --color-brand-200: #f6c6d4;
+  --color-brand-300: #ee9db4;
+  --color-brand-500: #d63d6c;
+  --color-brand-600: #bf2c5a;
+  --color-brand-700: #9e2249;
+  --color-brand-800: #7f1d3d;
+
+  /* Chocolate — textos e elementos secundários */
+  --color-cocoa-500: #8a6a62;
+  --color-cocoa-700: #5c3d36;
+  --color-cocoa-800: #4a2f29;
+  --color-cocoa-900: #3b2420;
+
+  /* Creme — fundos */
+  --color-cream-50: #fffaf6;
+  --color-cream-100: #fbf2ec;
+  --color-cream-200: #f4e6dc;
+
+  /* Pistácio — apontamentos de "novidade" */
+  --color-pistachio-100: #e6f2e4;
+  --color-pistachio-700: #3c6b3f;
+
+  --shadow-card: 0 1px 2px rgba(59, 36, 32, 0.04), 0 8px 24px -12px rgba(59, 36, 32, 0.18);
+  --shadow-lift: 0 2px 4px rgba(59, 36, 32, 0.05), 0 18px 40px -16px rgba(59, 36, 32, 0.28);
+}
+
+@layer base {
+  html {
+    -webkit-tap-highlight-color: transparent;
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream-50 font-sans text-cocoa-900 antialiased;
+    text-rendering: optimizeLegibility;
+  }
+  h1,
+  h2,
+  h3 {
+    @apply font-display;
+    font-optical-sizing: auto;
+    letter-spacing: -0.015em;
+  }
+  :focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+  }
+  ::selection {
+    background: var(--color-brand-200);
+    color: var(--color-cocoa-900);
+  }
+  input[type='number']::-webkit-inner-spin-button,
+  input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  input[type='number'] {
+    -moz-appearance: textfield;
+  }
+}
+
+@layer components {
+  .container-page {
+    @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+  }
+  .card {
+    @apply rounded-2xl border border-cocoa-900/[0.07] bg-white shadow-card;
+  }
+  .input {
+    @apply block w-full rounded-xl border border-cocoa-900/15 bg-white px-3.5 py-2.5 text-[15px] text-cocoa-900 transition placeholder:text-cocoa-500/70 hover:border-cocoa-900/25 focus:border-brand-500 focus:ring-4 focus:ring-brand-500/15 focus:outline-none;
+  }
+  .input[aria-invalid='true'] {
+    @apply border-brand-600 ring-4 ring-brand-500/10;
+  }
+  .eyebrow {
+    @apply text-xs font-semibold tracking-[0.18em] text-brand-600 uppercase;
+  }
+}
+
+/* --------------------------------------------------------------- Animações */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes slide-in-left {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes bump {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.28);
+  }
+}
+@keyframes shimmer {
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.fade-up {
+  animation: fade-up 0.5s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.toast-in {
+  animation: fade-up 0.28s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+.overlay-in {
+  animation: fade-in 0.2s ease-out both;
+}
+.drawer-right-in {
+  animation: slide-in-right 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.drawer-left-in {
+  animation: slide-in-left 0.32s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+.bump {
+  animation: bump 0.45s ease-out;
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--color-cream-200);
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.55), transparent);
+  animation: shimmer 1.4s infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

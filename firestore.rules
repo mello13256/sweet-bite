@@ -1,0 +1,65 @@
+rules_version = '2';
+
+// Regras de segurança do Firestore para a loja SweetBite.
+//  - Produtos e categorias: leitura pública, escrita apenas pela consola do
+//    Firebase ou pelo script de seed (Admin SDK, que ignora estas regras).
+//  - Pedidos: o site só pode CRIAR pedidos com uma estrutura válida.
+//    Ninguém os pode ler, alterar ou apagar a partir do site — a loja
+//    consulta-os na consola do Firebase.
+//
+// Nota: os preços enviados num pedido vêm do navegador do cliente. Verifique
+// sempre o pedido antes de o confirmar (o WhatsApp é o canal de confirmação).
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    match /products/{productId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /categories/{categoryId} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /orders/{orderId} {
+      allow create: if isValidOrder(request.resource.data);
+      allow read, update, delete: if false;
+    }
+
+    function isValidOrder(o) {
+      let keys = ['reference', 'status', 'channel', 'createdAt', 'items', 'subtotal', 'deliveryFee', 'total', 'customer', 'delivery'];
+      return o.keys().hasOnly(keys) && o.keys().hasAll(keys)
+        && o.reference is string && o.reference.size() <= 32
+        && o.status == 'pendente'
+        && o.channel == 'whatsapp'
+        && o.createdAt == request.time
+        && o.items is list && o.items.size() > 0 && o.items.size() <= 50
+        && o.subtotal is int && o.subtotal >= 0 && o.subtotal <= 10000000
+        && (o.deliveryFee == null || (o.deliveryFee is int && o.deliveryFee >= 0))
+        && o.total is int && o.total >= o.subtotal
+        && isValidCustomer(o.customer)
+        && isValidDelivery(o.delivery);
+    }
+
+    function isValidCustomer(c) {
+      return c is map
+        && c.keys().hasOnly(['name', 'phone', 'email', 'notes'])
+        && c.name is string && c.name.size() >= 2 && c.name.size() <= 80
+        && c.phone is string && c.phone.size() >= 9 && c.phone.size() <= 20
+        && c.email is string && c.email.size() <= 120
+        && c.notes is string && c.notes.size() <= 500;
+    }
+
+    function isValidDelivery(d) {
+      return d is map
+        && d.keys().hasOnly(['method', 'address', 'postalCode', 'city', 'preferredDate', 'preferredTime'])
+        && d.method in ['levantamento', 'entrega']
+        && d.address is string && d.address.size() <= 160
+        && d.postalCode is string && d.postalCode.size() <= 8
+        && d.city is string && d.city.size() <= 80
+        && d.preferredDate is string && d.preferredDate.size() <= 10
+        && d.preferredTime is string && d.preferredTime.size() <= 20;
+    }
+  }
+}
